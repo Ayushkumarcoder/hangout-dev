@@ -1,6 +1,9 @@
 import { Event } from "@/app/database";
 import connectDB from "@/lib/mongodb";
+import { rejects } from "assert";
 import { NextRequest, NextResponse } from "next/server";
+import { resolve } from "path";
+import { v2 as cloudinary } from 'cloudinary';
 
 export async function POST(req: NextRequest){
     try {
@@ -26,6 +29,28 @@ export async function POST(req: NextRequest){
             return NextResponse.json({ message: "Invalid event data" , error: error instanceof Error ? error.message : "Unknown error" }, { status: 400 });
         }
 
+        //need to upload image to cloudinary and get the url
+        const file = formData.get('image') as File;
+        if (!file) {
+            return NextResponse.json({ message: "Image file is required" }, { status: 400 });
+        }
+
+        const arrayBuffer = await file.arrayBuffer(); // Convert File to ArrayBuffer because fetch accepts it
+        const buffer = Buffer.from(arrayBuffer); // Convert ArrayBuffer to Buffer for Node.js
+
+        const uploadResult = await new Promise((resolve, rejects)=>{
+            cloudinary.uploader.upload_stream({ resource_type: 'image', folder: 'hangout-dev/events' }, (error, result) => {
+                if (error) {
+                    rejects(error);
+                } else {
+                    resolve(result);
+                }
+            }).end(buffer);
+        })
+
+        event.image = (uploadResult as {secure_url: string}).secure_url;
+        //setting the image url to the event object
+
         const createdEvent = await Event.create(event);
         //saving the event to the database
 
@@ -46,5 +71,21 @@ export async function POST(req: NextRequest){
             message: "Event creation failed", 
             error: error instanceof Error ? error.message : "Unknown error" 
         }, { status: 500 });
+    }
+}
+
+export async function GET(req: NextRequest){
+    try {
+
+        //connecting to the db
+        await connectDB();
+
+        const event = await Event.find().sort({ createdAt: -1 }); // Fetch events sorted by creation date (newest first)
+
+        return NextResponse.json({ message: "Events fetched successfully", events: event }, { status: 200 });
+        
+    } catch (error) {
+        return NextResponse.json({ message: "Error fetching events", error: error instanceof Error ? error.message : "Unknown error" }, { status: 500 });
+        
     }
 }
