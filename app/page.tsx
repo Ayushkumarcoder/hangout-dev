@@ -1,17 +1,13 @@
 import EventCard from '@/components/EventCard'
 import ExploreBtn from '@/components/ExploreBtn'
 import { IEvent } from './database';
-import {cacheLife} from "next/cache";
 
 
 const BaseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
-// export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic';
 
 const Page = async () => {
-
-  'use cache';
-    cacheLife('hours')
 
   const response = await fetch(`${BaseURL}/api/events`, { cache: 'no-store' });
 
@@ -24,7 +20,7 @@ const Page = async () => {
 
       <ExploreBtn></ExploreBtn>
 
-      <div className='mt-20 space-y-7'>
+      <div id='events-section' className='mt-20 space-y-7'>
         <h3>Featured Events</h3>
 
         <ul className='events'>

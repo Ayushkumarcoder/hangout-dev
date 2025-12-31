@@ -271,3 +271,28 @@
     }
   }
 }
+  /* Form Styles */
+  .form-group {
+    @apply flex flex-col gap-2;
+  }
+
+  .form-label {
+    @apply text-light-100 font-semibold text-base;
+  }
+
+  .form-input {
+    @apply bg-dark-200 text-light-100 rounded-[10px] px-5 py-3 border border-border-dark focus:border-primary focus:outline-none transition-colors;
+  }
+
+  .form-input::placeholder {
+    @apply text-light-200;
+  }
+
+  .btn-primary {
+    @apply bg-primary hover:bg-primary/90 cursor-pointer items-center justify-center rounded-[10px] px-6 py-3 font-semibold text-black transition-colors;
+  }
+
+  .btn-secondary {
+    @apply bg-dark-200 hover:bg-dark-100 text-light-100 cursor-pointer items-center justify-center rounded-[10px] px-4 py-2 font-medium border border-border-dark transition-colors;
+  }
+

@@ -5,6 +5,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { resolve } from "path";
 import { v2 as cloudinary } from 'cloudinary';
 
+// Configure Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 export async function POST(req: NextRequest){
     try {
 
@@ -15,10 +22,14 @@ export async function POST(req: NextRequest){
         //we are using formData to get the data from the request body because we are sending the data as formData from the client side
         //what is formData? FormData is a built-in web API that allows you to easily construct a set of key/value pairs representing form fields and their values, which can then be easily sent using the fetch API or XMLHttpRequest.
         
-        let event;
+        let event: any;
         try {
 
             event = Object.fromEntries(formData.entries());
+            
+            // Handle arrays properly - Object.fromEntries only keeps last value for duplicate keys
+            event.agenda = formData.getAll('agenda');
+            event.tags = formData.getAll('tags');
             
             // Normalize mode to lowercase to match schema enum validation
             if (event.mode && typeof event.mode === 'string') {
